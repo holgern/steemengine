@@ -39,6 +39,9 @@ class Market(list):
         return metrics
 
     def get_buy_book(self, symbol, account=None, limit=100, offset=0):
+        """Returns the buy book for a given symbol. When account is set,
+            the order book from the given account is shown.
+        """
         if self.tokens.get_token(symbol) is None:
             raise TokenDoesNotExists("%s does not exists" % symbol)
         if account is None:
@@ -48,6 +51,9 @@ class Market(list):
         return buy_book
 
     def get_sell_book(self, symbol, account=None, limit=100, offset=0):
+        """Returns the sell book for a given symbol. When account is set,
+            the order book from the given account is shown.
+        """        
         if self.tokens.get_token(symbol) is None:
             raise TokenDoesNotExists("%s does not exists" % symbol)
         if account is None:
@@ -57,6 +63,9 @@ class Market(list):
         return sell_book
 
     def get_trades_history(self, symbol, account=None, limit=30, offset=0):
+        """Returns the trade history for a given symbol. When account is set,
+            the trade history from the given account is shown.
+        """        
         if self.tokens.get_token(symbol) is None:
             raise TokenDoesNotExists("%s does not exists" % symbol)
         if account is None:
@@ -114,8 +123,8 @@ class Market(list):
         acc = Account(account, steem_instance=self.steem)
         steem_balance = acc.get_balance("available", "STEEM")
         if float(steem_balance) < float(amount):
-            raise InsufficientTokenAmount("Only %.3f in wallet" % float(steem_balance))       
-        json_data = '{"id":"ssc-mainnet1","json":{"contractName":"steempegged","contractAction":"buy","contractPayload":{}}}' 
+            raise InsufficientTokenAmount("Only %.3f in wallet" % float(steem_balance))
+        json_data = '{"id":"ssc-mainnet1","json":{"contractName":"steempegged","contractAction":"buy","contractPayload":{}}}'
         tx = acc.transfer("steem-peg", amount, "STEEM", memo=json_data)
         return tx
 

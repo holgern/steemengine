@@ -58,3 +58,63 @@ from steemengine.api import Api
 api = Api()
 print(api.get_history("holger80", "NINJA"))
 ```
+## Token transfer
+```
+from beem import Steem
+from steemengine.wallet import Wallet
+stm = Steem(keys=["5xx"])
+wallet = Wallet("test_user", steem_instance=stm)
+wallet.transfer("test1",1,"TST", memo="This is a test")
+```
+## Buy/Sell
+### Create a buy order
+```
+from beem import Steem
+from steemengine.market import Market
+stm = Steem(keys=["5xx"])
+m=Market(steem_instance=stm)
+m.buy("test_user", 1, "TST", 9.99)
+```
+### Create a sell order
+
+```
+from beem import Steem
+from steemengine.market import Market
+stm = Steem(keys=["5xx"])
+m=Market(steem_instance=stm)
+m.sell("test_user", 1, "TST", 9.99)
+```
+### Cancel a buy order
+```
+from beem import Steem
+from steemengine.market import Market
+stm = Steem(keys=["5xx"])
+m=Market(steem_instance=stm)
+open_buy_orders = m.get_buy_book("TST", "test_user")
+m.cancel("test_user", "buy", open_buy_orders[0]["$loki"])
+```
+### Cancel a sell order
+```
+from beem import Steem
+from steemengine.market import Market
+stm = Steem(keys=["5xx"])
+m=Market(steem_instance=stm)
+open_sell_orders = m.get_sell_book("TST", "test_user")
+m.cancel("test_user", "sell", open_sell_orders[0]["$loki"])
+```
+### Deposit Steem
+```
+from beem import Steem
+from steemengine.market import Market
+stm = Steem(keys=["5xx"])
+m=Market(steem_instance=stm)
+m.deposit("test_user", 10)
+```
+### Withdrawel
+```
+from beem import Steem
+from steemengine.market import Market
+stm = Steem(keys=["5xx"])
+m=Market(steem_instance=stm)
+m.withdraw("test_user", 10)
+```
