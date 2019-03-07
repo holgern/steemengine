@@ -11,22 +11,22 @@ from steemengine.api import Api
 class Testcases(unittest.TestCase):
     def test_api(self):
         api = Api()
-        result = api.getLatestBlockInfo()
+        result = api.get_latest_block_info()
         self.assertTrue(len(result) > 0)
         
-        result = api.getBlockInfo(1910)
+        result = api.get_block_info(1910)
         self.assertTrue(len(result) > 0)
         
-        result = api.getTransactionInfo("e6c7f351b3743d1ed3d66eb9c6f2c102020aaa5d")
+        result = api.get_transaction_info("e6c7f351b3743d1ed3d66eb9c6f2c102020aaa5d")
         self.assertTrue(len(result) > 0)
         
-        result = api.getContract("tokens")
+        result = api.get_contract("tokens")
         self.assertTrue(len(result) > 0)
         
         result = api.find("tokens", "tokens")
         self.assertTrue(len(result) > 0)
         
-        result = api.findOne("tokens", "tokens")
+        result = api.find_one("tokens", "tokens")
         self.assertTrue(len(result) > 0)
         
         result = api.get_history("holger80", "NINJA")
