@@ -7,7 +7,7 @@ from __future__ import unicode_literals
 from beem import Steem
 from beem.comment import Comment
 from beem.nodelist import NodeList
-from steemengine.api import Api
+from steemengine.wallet import Wallet
 import time
 
 
@@ -15,7 +15,7 @@ if __name__ == "__main__":
     nodelist = NodeList()
     nodelist.update_nodes()
     stm = Steem(node=nodelist.get_nodes())
-    api = Api()
+    
     
     # edit here
     upvote_account = "beembot"
@@ -23,13 +23,17 @@ if __name__ == "__main__":
     token_weight_factor = 100 # multiply token amount to get weight
     min_token_amount = 0.01
     max_post_age_days = 3
-    whitelist = ["holger80"]
-    blacklist_tags = []
+    whitelist = [] # When empty, the whitelist is disabled
+    blacklist_tags = [] # When empty, the tag blacklist is disabled
+    reply_comment = "" # When empty, no reply comment is created
     only_main_posts = True
     stm.wallet.unlock("wallet-passwd")
+    
+    wallet = Wallet(upvote_account, steem_instance=stm)
+    
     last_steem_block = 1950 # It is a good idea to store this block, otherwise all transfers will be checked again
     while True:
-        history = api.get_history(upvote_account, upvote_token, limit=1000, offset=0, histtype='user')
+        history = wallet.get_history(upvote_token)
         for h in history:
             if int(h["block"]) <= last_steem_block:
                 continue
@@ -74,5 +78,9 @@ if __name__ == "__main__":
             if upvote_weight > 100:
                 upvote_weight = 100
             print("upvote %s from %s with %.2f %%" % (c["permlink"], c["author"], upvote_weight))
-            c.upvote(weight=upvote_weight, voter=upvote_account)
+            print(c.upvote(weight=upvote_weight, voter=upvote_account))
+            if len(reply_comment) > 0:
+                time.sleep(4)
+                print(c.reply(reply_comment, author=upvote_account))
+            
         time.sleep(60)

@@ -70,4 +70,8 @@ class Api(object):
         """Get an array of objects that match the query from the table of the specified contract"""
         ret = self.rpc.find({"contract": contract_name, "table": table_name, "query": query,
                              "limit": limit, "offset": offset, "indexes": indexes}, endpoint="contracts")
-        return ret
+        if isinstance(ret, list) and len(ret) == 1:
+            return ret[0]
+        else:
+            return ret
+

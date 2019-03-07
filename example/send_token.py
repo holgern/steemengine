@@ -8,7 +8,7 @@ import time
 import io
 import logging
 from beem import Steem
-from steemengine.api import Api
+from steemengine.wallet import Wallet
 from beembase import transactions, operations
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -16,28 +16,17 @@ logging.basicConfig(level=logging.INFO)
 
 if __name__ == "__main__":
     stm = Steem()
-    stm.wallet.unlock(pwd="pwd123")
-    
-    api = Api()
-    balance = api.find("tokens", "balances", query={"account": "beembot", "symbol": "DRAGON"})
-    
-    if len(balance) > 0 and balance[0]["balance"] >= 0.01:
-        print(balance[0])
-        json_data = {"contractName":"tokens","contractAction":"transfer","contractPayload":{"symbol":"DRAGON","to":"holger80","quantity":0.01,"memo":"Test"}}
-        
-        op = operations.Custom_json(
-            **{
-                "json": json_data,
-                "required_auths": ["beembot"],
-                "required_posting_auths": [],
-                "id": "	ssc-mainnet1",
-                "prefix": "STM",
-            })
-        print(stm.finalizeOp(op, "beembot", "active"))
-        
+    stm.wallet.unlock(pwd="wallet_pass")
+    wallet = Wallet("beembot", steem_instance=stm)
+    dragon_token = wallet.get_token("DRAGON")
+    if dragon_token is not None and float(dragon_token["balance"]) >= 0.01:
+        print("balance %.2f" % float(dragon_token["balance"]))
+        print(wallet.transfer("holger80", 0.01, "DRAGON", "test"))
     else:
         print("Could not sent")
-    balance = api.find("tokens", "balances", query={"account": "beembot", "symbol": "DRAGON"})
-    print("new balance %.2f" % balance[0]["balance"])
+    time.sleep(15)
+    wallet.refresh()
+    dragon_token = wallet.get_token("DRAGON")
+    print("new balance %.2f" % float(dragon_token["balance"]))
 
     
