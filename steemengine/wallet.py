@@ -12,6 +12,7 @@ from timeit import default_timer as timer
 import logging
 from steemengine.api import Api
 from steemengine.exceptions import (TokenDoesNotExists, TokenNotInWallet, InsufficientTokenAmount)
+from steemengine.market import Market
 from beem.instance import shared_steem_instance
 from beem.account import Account
 
@@ -86,3 +87,25 @@ class Wallet(list):
     def get_history(self, symbol, limit=1000, offset=0):
         """Returns the transfer history of a token"""
         return self.api.get_history(self.account, symbol, limit, offset)
+
+    def get_buy_book(self, symbol=None, limit=100, offset=0):
+        """Returns the buy book for the wallet account. When symbol is set,
+            the order book from the given token is shown.
+        """
+        if symbol is None:
+            buy_book = self.api.find("market", "buyBook", query={"account": self.account}, limit=limit, offset=offset)
+        else:
+            m = Market(steem_instance=self.steem)
+            buy_book = m.get_buy_book(symbol, self.account, limit=limit, offset=offset)
+        return buy_book
+
+    def get_sell_book(self, symbol=None, limit=100, offset=0):
+        """Returns the sell book for the wallet account. When symbol is set,
+            the order book from the given token is shown.
+        """        
+        if symbol is None:
+            sell_book = self.api.find("market", "sellBook", query={"account": self.account}, limit=limit, offset=offset)
+        else:
+            m = Market(steem_instance=self.steem)
+            sell_book = m.get_sell_book(symbol, self.account, limit=limit, offset=offset)
+        return sell_book

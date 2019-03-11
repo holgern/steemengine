@@ -2,18 +2,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
-import sys
-from datetime import datetime, timedelta, date
-import time
-import io
-import json
-import requests
-from timeit import default_timer as timer
-import logging
 from steemengine.api import Api
-from steemengine.exceptions import (TokenDoesNotExists, TokenNotInWallet, InsufficientTokenAmount)
-from beem.instance import shared_steem_instance
-from beem.account import Account
 
 
 class Token(dict):

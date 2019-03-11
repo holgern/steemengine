@@ -2,14 +2,6 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
-import sys
-from datetime import datetime, timedelta, date
-import time
-import io
-import json
-import requests
-from timeit import default_timer as timer
-import logging
 from steemengine.api import Api
 from steemengine.tokenobject import Token
 
