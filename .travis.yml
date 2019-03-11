@@ -34,12 +34,6 @@ matrix:
       env:
         # - TOXENV=py36short
         - BUILD_LINUX=yes
-    - os: osx
-      osx_image: xcode9.3
-      language: objective-c
-      env:
-        - TRAVIS_PYTHON_VERSION=3.6
-        # - TOXENV=short
 
 cache: pip
 
