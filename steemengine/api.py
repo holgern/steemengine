@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 import sys
 from datetime import datetime, timedelta, date
 import time
-import io
 import json
 import requests
 from timeit import default_timer as timer

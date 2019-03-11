@@ -27,7 +27,7 @@ class Wallet(list):
         self.api = Api()
         self.steem = steem_instance or shared_steem_instance()
         check_account = Account(account, steem_instance=self.steem)
-        self.account = account
+        self.account = check_account["name"]
         self.refresh()
 
     def refresh(self):
@@ -41,14 +41,14 @@ class Wallet(list):
     def change_account(self, account):
         """Changes the wallet account"""
         check_account = Account(account, steem_instance=self.steem)
-        self.account = account
+        self.account = check_account["name"]
         self.refresh()
 
     def get_token(self, symbol):
         """Returns a token from the wallet. Is None when not available."""
-        for t in self:
-            if t["symbol"].lower() == symbol.lower():
-                return t
+        for token in self:
+            if token["symbol"].lower() == symbol.lower():
+                return token
         return None
 
     def transfer(self, to, amount, symbol, memo=""):
@@ -77,9 +77,9 @@ class Wallet(list):
         if float(token["balance"]) < float(amount):
             raise InsufficientTokenAmount("Only %.3f in wallet" % float(token["balance"]))
         check_to = Account(to, steem_instance=self.steem)
-        contractPayload = {"symbol":symbol.upper(),"to":to,"quantity":str(amount),"memo":memo}
+        contract_payload = {"symbol":symbol.upper(),"to":to,"quantity":str(amount),"memo":memo}
         json_data = {"contractName":"tokens","contractAction":"transfer",
-                     "contractPayload":contractPayload}
+                     "contractPayload":contract_payload}
         tx = self.steem.custom_json("ssc-mainnet1", json_data, required_auths=[self.account])
         return tx
 

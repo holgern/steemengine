@@ -6,17 +6,10 @@ from __future__ import unicode_literals
 from builtins import next
 from builtins import str
 from builtins import object
-from itertools import cycle
-import threading
 import sys
 import json
-import signal
 import logging
-import ssl
 import re
-import time
-import warnings
-import six
 
 from .version import version as steemengine_version
 if sys.version_info[0] < 3:

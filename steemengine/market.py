@@ -97,9 +97,9 @@ class Market(list):
             raise TokenNotInWallet("%s is not in wallet." % "STEEMP")
         if float(token["balance"]) < float(amount):
             raise InsufficientTokenAmount("Only %.3f in wallet" % float(token["balance"]))
-        contractPayload = {"quantity":str(amount)}
+        contract_payload = {"quantity":str(amount)}
         json_data = {"contractName":"steempegged","contractAction":"withdraw",
-                     "contractPayload":contractPayload}
+                     "contractPayload":contract_payload}
         tx = self.steem.custom_json("ssc-mainnet1", json_data, required_auths=[account])
         return tx
 
@@ -153,9 +153,9 @@ class Market(list):
             raise TokenNotInWallet("%s is not in wallet." % "STEEMP")
         if float(token["balance"]) < float(amount) * float(price):
             raise InsufficientTokenAmount("Only %.3f in wallet" % float(token["balance"]))
-        contractPayload = {"symbol": symbol.upper(), "quantity":str(amount), "price": str(price)}
+        contract_payload = {"symbol": symbol.upper(), "quantity":str(amount), "price": str(price)}
         json_data = {"contractName":"market","contractAction":"buy",
-                     "contractPayload":contractPayload}
+                     "contractPayload":contract_payload}
         tx = self.steem.custom_json("ssc-mainnet1", json_data, required_auths=[account])
         return tx
 
@@ -184,9 +184,9 @@ class Market(list):
             raise TokenNotInWallet("%s is not in wallet." % symbol)
         if float(token["balance"]) < float(amount):
             raise InsufficientTokenAmount("Only %.3f in wallet" % float(token["balance"]))
-        contractPayload = {"symbol": symbol.upper(), "quantity":str(amount), "price": str(price)}
+        contract_payload = {"symbol": symbol.upper(), "quantity":str(amount), "price": str(price)}
         json_data = {"contractName":"market","contractAction":"sell",
-                     "contractPayload":contractPayload}
+                     "contractPayload":contract_payload}
         tx = self.steem.custom_json("ssc-mainnet1", json_data, required_auths=[account])
         return tx
 
@@ -209,8 +209,8 @@ class Market(list):
                 market.sell("test", "sell", 12)
         """
 
-        contractPayload = {"type": order_type, "id": order_id}
+        contract_payload = {"type": order_type, "id": order_id}
         json_data = {"contractName":"market","contractAction":"cancel",
-                     "contractPayload":contractPayload}
+                     "contractPayload":contract_payload}
         tx = self.steem.custom_json("ssc-mainnet1", json_data, required_auths=[account])
         return tx

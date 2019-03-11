@@ -11,6 +11,7 @@ import requests
 from timeit import default_timer as timer
 import logging
 from steemengine.api import Api
+from steemengine.tokenobject import Token
 
 
 class Tokens(list):
@@ -29,10 +30,11 @@ class Tokens(list):
         return tokens
 
     def get_token(self, symbol):
-        """Returns dict from given token symbol. Is None
+        """Returns Token from given token symbol. Is None
             when token does not exists.
         """
         for t in self:
             if t["symbol"].lower() == symbol.lower():
-                return t
+                return Token(t)
         return None
+
