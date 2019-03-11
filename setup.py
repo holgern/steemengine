@@ -16,7 +16,7 @@ except LookupError:
     ascii = codecs.lookup('ascii')
     codecs.register(lambda name, enc=ascii: {True: enc}.get(name == 'mbcs'))
 
-VERSION = '0.3.1'
+VERSION = '0.3.2'
 
 tests_require = ['mock >= 2.0.0', 'pytest', 'pytest-mock', 'parameterized']
 
@@ -78,7 +78,7 @@ if __name__ == '__main__':
         install_requires=requires,
         entry_points={
             'console_scripts': [
-                'steemengine=steemengine.cli:main',
+                'steemengine=steemengine.cli:cli',
             ],
         },
         include_package_data=True,
