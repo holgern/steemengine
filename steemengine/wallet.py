@@ -12,7 +12,6 @@ from timeit import default_timer as timer
 import logging
 from steemengine.api import Api
 from steemengine.exceptions import (TokenDoesNotExists, TokenNotInWallet, InsufficientTokenAmount)
-from steemengine.market import Market
 from beem.instance import shared_steem_instance
 from beem.account import Account
 
@@ -95,8 +94,7 @@ class Wallet(list):
         if symbol is None:
             buy_book = self.api.find("market", "buyBook", query={"account": self.account}, limit=limit, offset=offset)
         else:
-            m = Market(steem_instance=self.steem)
-            buy_book = m.get_buy_book(symbol, self.account, limit=limit, offset=offset)
+            buy_book = self.api.find("market", "buyBook", query={"symbol": symbol, "account": self.account}, limit=limit, offset=offset)
         return buy_book
 
     def get_sell_book(self, symbol=None, limit=100, offset=0):
@@ -106,6 +104,5 @@ class Wallet(list):
         if symbol is None:
             sell_book = self.api.find("market", "sellBook", query={"account": self.account}, limit=limit, offset=offset)
         else:
-            m = Market(steem_instance=self.steem)
-            sell_book = m.get_sell_book(symbol, self.account, limit=limit, offset=offset)
+            sell_book = self.api.find("market", "sellBook", query={"symbol": symbol, "account": self.account}, limit=limit, offset=offset)
         return sell_book

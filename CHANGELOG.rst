@@ -1,3 +1,6 @@
+## 0.3.1
+* Fix circular dependency
+
 ## 0.3.0
 * Token class added, allows to get information about markets, holder and the token itself
 * CLI added for showing information about blocks, transaction, token and accounts
