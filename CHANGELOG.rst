@@ -1,3 +1,13 @@
+## 0.4.0
+* quantize added to Token class
+* TokenDoesNotExists is raised in the Token class when token does not exists
+* Exception InvalidTokenAmount is raised when amount to transfer or to issue is below precision
+* new issue function added to wallet
+* token precision is taken into account for transfer and issue
+* TokenIssueNotPermitted is raised when an account which is not the token issuer tries to issue
+* Add amount quantization to deposit, withdraw, buy and sell
+* Add transfer, issue, withdraw, deposit, buy, sell, cancel, buybook, sellbook to CLI
+
 ## 0.3.1
 * Fix circular dependency
 
