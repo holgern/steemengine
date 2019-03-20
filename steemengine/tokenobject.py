@@ -3,6 +3,8 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 from steemengine.api import Api
+from steemengine.exceptions import TokenDoesNotExists
+import decimal
 
 
 class Token(dict):
@@ -21,7 +23,15 @@ class Token(dict):
 
     def refresh(self):
         info = self.get_info()
+        if info is None:
+            raise TokenDoesNotExists("Token %s does not exists!" % self.symbol)
         super(Token, self).__init__(info)
+
+    def quantize(self, amount):
+        """Round down a amount using the token precision and returns a Decimal object"""
+        amount = decimal.Decimal(amount)
+        places = decimal.Decimal(10) ** (-self["precision"])
+        return amount.quantize(places, rounding=decimal.ROUND_DOWN)
 
     def get_info(self):
         """Returns information about the token"""

@@ -18,6 +18,24 @@ class TokenNotInWallet(Exception):
 
 
 class InsufficientTokenAmount(Exception):
-    """ Not suffienct amount for transkfer in the wallet
+    """ Not suffienct amount for transfer in the wallet
+    """
+    pass
+
+
+class InvalidTokenAmount(Exception):
+    """ Invalid token amount (not fitting precision or max supply)
+    """
+    pass
+
+
+class TokenIssueNotPermitted(Exception):
+    """ Only the token issuer is allowed to permit new tokens
+    """
+    pass
+
+
+class MaxSupplyReached(Exception):
+    """ Only the token issuer is allowed to permit new tokens
     """
     pass

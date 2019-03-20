@@ -10,8 +10,10 @@ import json
 import requests
 from timeit import default_timer as timer
 import logging
+import decimal
 from steemengine.api import Api
-from steemengine.exceptions import (TokenDoesNotExists, TokenNotInWallet, InsufficientTokenAmount)
+from steemengine.tokenobject import Token
+from steemengine.exceptions import (TokenDoesNotExists, TokenNotInWallet, InsufficientTokenAmount, TokenIssueNotPermitted, MaxSupplyReached, InvalidTokenAmount)
 from beem.instance import shared_steem_instance
 from beem.account import Account
 
@@ -22,6 +24,15 @@ class Wallet(list):
         :param str account: Name of the account
         :param Steem steem_instance: Steem
                instance
+               
+        Wallet example:
+
+            .. code-block:: python
+
+                from steemengine.wallet import Wallet
+                wallet = Wallet("test")
+                print(wallet)
+
     """
     def __init__(self, account, steem_instance=None):
         self.api = Api()
@@ -71,14 +82,53 @@ class Wallet(list):
                 wallet = Wallet("test", steem_instance=stm)
                 wallet.transfer("test1", 1, "ENG", "test")
         """
-        token = self.get_token(symbol)
-        if token is None:
+        token_in_wallet = self.get_token(symbol)
+        if token_in_wallet is None:
             raise TokenNotInWallet("%s is not in wallet." % symbol)
-        if float(token["balance"]) < float(amount):
-            raise InsufficientTokenAmount("Only %.3f in wallet" % float(token["balance"]))
+        if float(token_in_wallet["balance"]) < float(amount):
+            raise InsufficientTokenAmount("Only %.3f in wallet" % float(token_in_wallet["balance"]))
+        token = Token(symbol)
+        quant_amount = token.quantize(amount)
+        if quant_amount <= decimal.Decimal("0"):
+            raise InvalidTokenAmount("Amount to transfer is below token precision of %d" % token["precision"])
         check_to = Account(to, steem_instance=self.steem)
-        contract_payload = {"symbol":symbol.upper(),"to":to,"quantity":str(amount),"memo":memo}
+        contract_payload = {"symbol":symbol.upper(),"to":to,"quantity":str(quant_amount),"memo":memo}
         json_data = {"contractName":"tokens","contractAction":"transfer",
+                     "contractPayload":contract_payload}
+        tx = self.steem.custom_json("ssc-mainnet1", json_data, required_auths=[self.account])
+        return tx
+
+    def issue(self, to, amount, symbol):
+        """Issues a specific token amount.
+
+            :param str to: Recipient
+            :param float amount: Amount to issue
+            :param str symbol: Token to issue
+
+
+            Issue example:
+
+            .. code-block:: python
+
+                from steemengine.wallet import Wallet
+                from beem import Steem
+                active_wif = "5xxxx"
+                stm = Steem(keys=[active_wif])
+                wallet = Wallet("test", steem_instance=stm)
+                wallet.issue(1, "my_token")
+        """
+        token = Token(symbol)
+        if token["issuer"] != self.account:
+            raise TokenIssueNotPermitted("%s is not the issuer of token %s" % (self.account, symbol))
+        
+        if token["maxSupply"] == token["supply"]:
+            raise MaxSupplyReached("%s has reached is maximum supply of %d" % (symbol, token["maxSupply"]))
+        quant_amount = token.quantize(amount)
+        if quant_amount <= decimal.Decimal("0"):
+            raise InvalidTokenAmount("Amount to issue is below token precision of %d" % token["precision"])        
+        check_to = Account(to, steem_instance=self.steem)
+        contract_payload = {"symbol":symbol.upper(),"to":to,"quantity":str(amount)}
+        json_data = {"contractName":"tokens","contractAction":"issue",
                      "contractPayload":contract_payload}
         tx = self.steem.custom_json("ssc-mainnet1", json_data, required_auths=[self.account])
         return tx
