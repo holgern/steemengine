@@ -29,6 +29,44 @@ from beem.instance import set_shared_steem_instance, shared_steem_instance
 from steemengine.version import version as __version__
 click.disable_unicode_literals_warning = True
 log = logging.getLogger(__name__)
+try:
+    import keyring
+    if not isinstance(keyring.get_keyring(), keyring.backends.fail.Keyring):
+        KEYRING_AVAILABLE = True
+    else:
+        KEYRING_AVAILABLE = False
+except ImportError:
+    KEYRING_AVAILABLE = False
+
+
+def unlock_wallet(stm, password=None):
+    if stm.unsigned and stm.nobroadcast:
+        return True
+    password_storage = stm.config["password_storage"]
+    if not password and KEYRING_AVAILABLE and password_storage == "keyring":
+        password = keyring.get_password("beem", "wallet")
+    if not password and password_storage == "environment" and "UNLOCK" in os.environ:
+        password = os.environ.get("UNLOCK")
+    if bool(password):
+        stm.wallet.unlock(password)
+    else:
+        password = click.prompt("Password to unlock wallet", confirmation_prompt=False, hide_input=True)
+        stm.wallet.unlock(password)
+
+    if stm.wallet.locked():
+        if password_storage == "keyring" or password_storage == "environment":
+            print("Wallet could not be unlocked with %s!" % password_storage)
+            password = click.prompt("Password to unlock wallet", confirmation_prompt=False, hide_input=True)
+            if bool(password):
+                unlock_wallet(stm, password=password)
+                if not stm.wallet.locked():
+                    return True
+        else:
+            print("Wallet could not be unlocked!")
+        return False
+    else:
+        print("Wallet Unlocked!")
+        return True
 
 
 @click.group(chain=True)
@@ -150,6 +188,7 @@ def info(objects):
             t.add_row(["transactionId", trx["transactionId"]])
             print(t.get_string())            
 
+
 @cli.command()
 @click.argument('symbol', nargs=1)
 @click.option('--top', '-t', help='Show only the top n accounts', default=50)
@@ -167,6 +206,192 @@ def richlist(symbol, top):
     for balance in sorted_holder[:int(top)]:
         t.add_row([balance["balance"], balance["account"], "%.3f" % (float(balance["balance"]) * last_price)])
     print(t.get_string())
+
+
+@cli.command()
+@click.argument('to', nargs=1)
+@click.argument('amount', nargs=1)
+@click.argument('token', nargs=1)
+@click.argument('memo', nargs=1, required=False)
+@click.option('--account', '-a', help='Transfer from this account')
+def transfer(to, amount, token, memo, account):
+    """Transfer a token"""
+    stm = shared_steem_instance()
+    if stm.rpc is not None:
+        stm.rpc.rpcconnect()
+    if not account:
+        account = stm.config["default_account"]
+    if not bool(memo):
+        memo = ''
+    if not unlock_wallet(stm):
+        return
+    wallet = Wallet(account, steem_instance=stm)
+    tx = wallet.transfer(to, amount, token, memo)
+    tx = json.dumps(tx, indent=4)
+    print(tx)
+
+
+@cli.command()
+@click.argument('to', nargs=1)
+@click.argument('amount', nargs=1)
+@click.argument('token', nargs=1)
+@click.option('--account', '-a', help='Transfer from this account')
+def issue(to, amount, token, memo, account):
+    """Issue a token"""
+    stm = shared_steem_instance()
+    if stm.rpc is not None:
+        stm.rpc.rpcconnect()
+    if not account:
+        account = stm.config["default_account"]
+    if not bool(memo):
+        memo = ''
+    if not unlock_wallet(stm):
+        return
+    wallet = Wallet(account, steem_instance=stm)
+    tx = wallet.issue(to, amount, token)
+    tx = json.dumps(tx, indent=4)
+    print(tx)
+
+
+@cli.command()
+@click.argument('amount', nargs=1)
+@click.option('--account', '-a', help='withdraw from this account')
+def withdraw(amount, account):
+    """Widthdraw STEEMP to account as STEEM."""
+    stm = shared_steem_instance()
+    if stm.rpc is not None:
+        stm.rpc.rpcconnect()
+    if not account:
+        account = stm.config["default_account"]
+    if not unlock_wallet(stm):
+        return
+    market = Market(steem_instance=stm)
+    tx = market.withdraw(account, amount)
+    tx = json.dumps(tx, indent=4)
+    print(tx)
+
+
+@cli.command()
+@click.argument('amount', nargs=1)
+@click.option('--account', '-a', help='withdraw from this account')
+def deposit(amount, account):
+    """Deposit STEEM to market in exchange for STEEMP."""
+    stm = shared_steem_instance()
+    if stm.rpc is not None:
+        stm.rpc.rpcconnect()
+    if not account:
+        account = stm.config["default_account"]
+    if not unlock_wallet(stm):
+        return
+    market = Market(steem_instance=stm)
+    tx = market.deposit(account, amount)
+    tx = json.dumps(tx, indent=4)
+    print(tx)
+
+
+@cli.command()
+@click.argument('amount', nargs=1)
+@click.argument('token', nargs=1)
+@click.argument('price', nargs=1)
+@click.option('--account', '-a', help='Buy with this account (defaults to "default_account")')
+def buy(amount, token, price, account):
+    """Put a buy-order for a token to the steem-engine market
+
+    """
+    stm = shared_steem_instance()
+    if stm.rpc is not None:
+        stm.rpc.rpcconnect()
+    if account is None:
+        account = stm.config["default_account"]
+    market = Market(steem_instance=stm)
+    if not unlock_wallet(stm):
+        return
+    tx = market.buy(account, amount, token, price)
+    tx = json.dumps(tx, indent=4)
+    print(tx)
+
+
+@cli.command()
+@click.argument('amount', nargs=1)
+@click.argument('token', nargs=1)
+@click.argument('price', nargs=1)
+@click.option('--account', '-a', help='Buy with this account (defaults to "default_account")')
+def sell(amount, token, price, account):
+    """Put a sell-order for a token to the steem-engine market
+
+    """
+    stm = shared_steem_instance()
+    if stm.rpc is not None:
+        stm.rpc.rpcconnect()
+    if account is None:
+        account = stm.config["default_account"]
+    market = Market(steem_instance=stm)
+    if not unlock_wallet(stm):
+        return
+    tx = market.sell(account, amount, token, price)
+    tx = json.dumps(tx, indent=4)
+    print(tx)
+
+
+@cli.command()
+@click.argument('order_type', nargs=1)
+@click.argument('order_id', nargs=1)
+@click.option('--account', '-a', help='Buy with this account (defaults to "default_account")')
+def cancel(order_type, order_id, account):
+    """Cancel a buy/sell order
+    
+        order_type is either sell or buy
+    """
+    stm = shared_steem_instance()
+    if stm.rpc is not None:
+        stm.rpc.rpcconnect()
+    if account is None:
+        account = stm.config["default_account"]
+    market = Market(steem_instance=stm)
+    if not unlock_wallet(stm):
+        return
+    tx = market.cancel(account, order_type, order_id)
+    tx = json.dumps(tx, indent=4)
+    print(tx)
+
+
+@cli.command()
+@click.argument('token', nargs=1)
+@click.option('--account', '-a', help='Buy with this account (defaults to "default_account")')
+def buybook(token, account):
+    """Returns the buy book for the given token
+
+    """
+    stm = shared_steem_instance()
+    if stm.rpc is not None:
+        stm.rpc.rpcconnect()
+    market = Market(steem_instance=stm)
+    buy_book = market.get_buy_book(token, account)
+    sorted_buy_book = sorted(buy_book, key=lambda account: float(account["price"]), reverse=True)
+    t = PrettyTable(["order_id", "account", "quantity", "price"])
+    t.align = "l"
+    for order in sorted_buy_book:
+        t.add_row([order["$loki"], order["account"], order["quantity"], order["price"]])
+    print(t.get_string())    
+
+
+@cli.command()
+@click.argument('token', nargs=1)
+@click.option('--account', '-a', help='Buy with this account (defaults to "default_account")')
+def sellbook(token, account):
+    """Returns the sell book for the given token
+    """
+    stm = shared_steem_instance()
+    if stm.rpc is not None:
+        stm.rpc.rpcconnect()
+    market = Market(steem_instance=stm)
+    sell_book = market.get_sell_book(token, account)
+    sorted_sell_book = sorted(sell_book, key=lambda account: float(account["price"]), reverse=False)
+    t = PrettyTable(["order_id", "account", "quantity", "price"])
+    t.align = "l"
+    for order in sorted_sell_book:
+        t.add_row([order["$loki"], order["account"], order["quantity"], order["price"]])
+    print(t.get_string())  
 
 
 if __name__ == "__main__":
