@@ -223,7 +223,7 @@ class Market(list):
                 market.sell("test", "sell", 12)
         """
 
-        contract_payload = {"type": order_type, "id": order_id}
+        contract_payload = {"type": order_type, "id": int(order_id)}
         json_data = {"contractName":"market","contractAction":"cancel",
                      "contractPayload":contract_payload}
         tx = self.steem.custom_json("ssc-mainnet1", json_data, required_auths=[account])

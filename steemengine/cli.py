@@ -350,7 +350,7 @@ def cancel(order_type, order_id, account):
     market = Market(steem_instance=stm)
     if not unlock_wallet(stm):
         return
-    tx = market.cancel(account, order_type, order_id)
+    tx = market.cancel(account, order_type, int(order_id))
     tx = json.dumps(tx, indent=4)
     print(tx)
 

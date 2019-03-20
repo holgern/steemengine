@@ -1,3 +1,6 @@
+## 0.4.1
+* Fix cancel order id (int)
+
 ## 0.4.0
 * quantize added to Token class
 * TokenDoesNotExists is raised in the Token class when token does not exists
