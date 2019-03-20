@@ -8,10 +8,12 @@ import time
 import json
 from timeit import default_timer as timer
 import logging
+import decimal
 from steemengine.api import Api
 from steemengine.tokens import Tokens
+from steemengine.tokenobject import Token
 from steemengine.wallet import Wallet
-from steemengine.exceptions import (TokenDoesNotExists, TokenNotInWallet, InsufficientTokenAmount)
+from steemengine.exceptions import (TokenDoesNotExists, TokenNotInWallet, InsufficientTokenAmount, InvalidTokenAmount)
 from beem.instance import shared_steem_instance
 from beem.account import Account
 
@@ -90,12 +92,16 @@ class Market(list):
                 market.withdraw("test", 1)
         """
         wallet = Wallet(account, steem_instance=self.steem)
-        token = wallet.get_token("STEEMP")
-        if token is None:
+        token_in_wallet = wallet.get_token("STEEMP")
+        if token_in_wallet is None:
             raise TokenNotInWallet("%s is not in wallet." % "STEEMP")
-        if float(token["balance"]) < float(amount):
-            raise InsufficientTokenAmount("Only %.3f in wallet" % float(token["balance"]))
-        contract_payload = {"quantity":str(amount)}
+        if float(token_in_wallet["balance"]) < float(amount):
+            raise InsufficientTokenAmount("Only %.3f in wallet" % float(token_in_wallet["balance"]))
+        token = Token("STEEMP")
+        quant_amount = token.quantize(amount)
+        if quant_amount <= decimal.Decimal("0"):
+            raise InvalidTokenAmount("Amount to transfer is below token precision of %d" % token["precision"])        
+        contract_payload = {"quantity":str(quant_amount)}
         json_data = {"contractName":"steempegged","contractAction":"withdraw",
                      "contractPayload":contract_payload}
         tx = self.steem.custom_json("ssc-mainnet1", json_data, required_auths=[account])
@@ -146,12 +152,17 @@ class Market(list):
                 market.buy("test", 1, "ENG", 0.95)
         """
         wallet = Wallet(account, steem_instance=self.steem)
-        token = wallet.get_token("STEEMP")
-        if token is None:
+        token_in_wallet = wallet.get_token("STEEMP")
+        if token_in_wallet is None:
             raise TokenNotInWallet("%s is not in wallet." % "STEEMP")
-        if float(token["balance"]) < float(amount) * float(price):
-            raise InsufficientTokenAmount("Only %.3f in wallet" % float(token["balance"]))
-        contract_payload = {"symbol": symbol.upper(), "quantity":str(amount), "price": str(price)}
+        if float(token_in_wallet["balance"]) < float(amount) * float(price):
+            raise InsufficientTokenAmount("Only %.3f in wallet" % float(token_in_wallet["balance"]))
+
+        token = Token(symbol)
+        quant_amount = token.quantize(amount)
+        if quant_amount <= decimal.Decimal("0"):
+            raise InvalidTokenAmount("Amount to transfer is below token precision of %d" % token["precision"])           
+        contract_payload = {"symbol": symbol.upper(), "quantity":str(quant_amount), "price": str(price)}
         json_data = {"contractName":"market","contractAction":"buy",
                      "contractPayload":contract_payload}
         tx = self.steem.custom_json("ssc-mainnet1", json_data, required_auths=[account])
@@ -177,12 +188,17 @@ class Market(list):
                 market.sell("test", 1, "ENG", 0.95)
         """
         wallet = Wallet(account, steem_instance=self.steem)
-        token = wallet.get_token(symbol)
-        if token is None:
+        token_in_wallet = wallet.get_token(symbol)
+        if token_in_wallet is None:
             raise TokenNotInWallet("%s is not in wallet." % symbol)
-        if float(token["balance"]) < float(amount):
-            raise InsufficientTokenAmount("Only %.3f in wallet" % float(token["balance"]))
-        contract_payload = {"symbol": symbol.upper(), "quantity":str(amount), "price": str(price)}
+        if float(token_in_wallet["balance"]) < float(amount):
+            raise InsufficientTokenAmount("Only %.3f in wallet" % float(token_in_wallet["balance"]))
+        
+        token = Token(symbol)
+        quant_amount = token.quantize(amount)
+        if quant_amount <= decimal.Decimal("0"):
+            raise InvalidTokenAmount("Amount to transfer is below token precision of %d" % token["precision"])        
+        contract_payload = {"symbol": symbol.upper(), "quantity":str(quant_amount), "price": str(price)}
         json_data = {"contractName":"market","contractAction":"sell",
                      "contractPayload":contract_payload}
         tx = self.steem.custom_json("ssc-mainnet1", json_data, required_auths=[account])

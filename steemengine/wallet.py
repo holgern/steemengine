@@ -127,7 +127,7 @@ class Wallet(list):
         if quant_amount <= decimal.Decimal("0"):
             raise InvalidTokenAmount("Amount to issue is below token precision of %d" % token["precision"])        
         check_to = Account(to, steem_instance=self.steem)
-        contract_payload = {"symbol":symbol.upper(),"to":to,"quantity":str(amount)}
+        contract_payload = {"symbol":symbol.upper(),"to":to,"quantity":str(quant_amount)}
         json_data = {"contractName":"tokens","contractAction":"issue",
                      "contractPayload":contract_payload}
         tx = self.steem.custom_json("ssc-mainnet1", json_data, required_auths=[self.account])
