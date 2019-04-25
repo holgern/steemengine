@@ -15,8 +15,11 @@ from .rpc import RPC
 class Api(object):
     """ Access the steem-engine API
     """
-    def __init__(self, user=None, password=None, **kwargs):
-        self.url = 'https://api.steem-engine.com/'
+    def __init__(self, url=None, user=None, password=None, **kwargs):
+        if url is None:
+            self.url = 'https://api.steem-engine.com/'
+        else:
+            self.url = url
         self.rpc = RPC()
 
     def get_history(self, account, symbol, limit=1000, offset=0, histtype="user"):

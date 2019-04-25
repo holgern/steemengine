@@ -12,8 +12,8 @@ class Token(dict):
 
         :param str token: Name of the token
     """
-    def __init__(self, symbol):
-        self.api = Api()
+    def __init__(self, symbol, url=None):
+        self.api = Api(url=url)
         if isinstance(symbol, dict):
             self.symbol = symbol["symbol"]
             super(Token, self).__init__(symbol)

@@ -24,8 +24,8 @@ class Market(list):
         :param Steem steem_instance: Steem
                instance
     """
-    def __init__(self, steem_instance=None):
-        self.api = Api()
+    def __init__(self, url=None, steem_instance=None):
+        self.api = Api(url=url)
         self.steem = steem_instance or shared_steem_instance()
         self.tokens = Tokens()
         self.refresh()
@@ -223,7 +223,7 @@ class Market(list):
                 market.sell("test", "sell", 12)
         """
 
-        contract_payload = {"type": order_type, "id": int(order_id)}
+        contract_payload = {"type": order_type, "id": order_id}
         json_data = {"contractName":"market","contractAction":"cancel",
                      "contractPayload":contract_payload}
         tx = self.steem.custom_json("ssc-mainnet1", json_data, required_auths=[account])

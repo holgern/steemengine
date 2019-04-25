@@ -9,8 +9,8 @@ from steemengine.tokenobject import Token
 class Tokens(list):
     """ Access the steem-engine tokens
     """
-    def __init__(self, **kwargs):
-        self.api = Api()
+    def __init__(self, url=None, **kwargs):
+        self.api = Api(url=url)
         self.refresh()
 
     def refresh(self):
