@@ -24,10 +24,10 @@ class Market(list):
         :param Steem steem_instance: Steem
                instance
     """
-    def __init__(self, url=None, steem_instance=None):
-        self.api = Api(url=url)
+    def __init__(self, url=None, rpcurl=None, steem_instance=None):
+        self.api = Api(url=url, rpcurl=rpcurl)
         self.steem = steem_instance or shared_steem_instance()
-        self.tokens = Tokens()
+        self.tokens = Tokens(url=url, rpcurl=rpcurl)
         self.refresh()
 
     def refresh(self):

@@ -34,8 +34,8 @@ class Wallet(list):
                 print(wallet)
 
     """
-    def __init__(self, account, url=None, steem_instance=None):
-        self.api = Api(url=url)
+    def __init__(self, account, url=None, rpcurl=None, steem_instance=None):
+        self.api = Api(url=url, rpcurl=rpcurl)
         self.steem = steem_instance or shared_steem_instance()
         check_account = Account(account, steem_instance=self.steem)
         self.account = check_account["name"]

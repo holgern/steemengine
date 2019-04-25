@@ -105,7 +105,7 @@ class RPC(object):
         if url is None:
             self.url = 'https://api.steem-engine.com/rpc/'
         else:
-            self.url = url + 'rpc/'
+            self.url = url
         self.session = shared_session_instance()
         self.headers = {'User-Agent': 'steemengine v%s' % (steemengine_version),
                         'content-type': 'application/json'}        
