@@ -93,7 +93,7 @@ class RPC(object):
 
     """
 
-    def __init__(self, user=None, password=None, **kwargs):
+    def __init__(self, url=None, user=None, password=None, **kwargs):
         """Init."""
         self._request_id = 0
         self.timeout = kwargs.get('timeout', 60)
@@ -102,7 +102,10 @@ class RPC(object):
 
         self.user = user
         self.password = password
-        self.url = "https://api.steem-engine.com/rpc/"
+        if url is None:
+            self.url = 'https://api.steem-engine.com/rpc/'
+        else:
+            self.url = url + 'rpc/'
         self.session = shared_session_instance()
         self.headers = {'User-Agent': 'steemengine v%s' % (steemengine_version),
                         'content-type': 'application/json'}        

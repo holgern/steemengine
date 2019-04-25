@@ -20,7 +20,7 @@ class Api(object):
             self.url = 'https://api.steem-engine.com/'
         else:
             self.url = url
-        self.rpc = RPC()
+        self.rpc = RPC(url=url)
 
     def get_history(self, account, symbol, limit=1000, offset=0, histtype="user"):
         """"Get the transaction history for an account and a token"""
