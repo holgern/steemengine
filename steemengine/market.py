@@ -24,10 +24,13 @@ class Market(list):
         :param Steem steem_instance: Steem
                instance
     """
-    def __init__(self, url=None, rpcurl=None, steem_instance=None):
-        self.api = Api(url=url, rpcurl=rpcurl)
+    def __init__(self, api=None, steem_instance=None):
+        if api is None:
+            self.api = Api()
+        else:
+            self.api = api        
         self.steem = steem_instance or shared_steem_instance()
-        self.tokens = Tokens(url=url, rpcurl=rpcurl)
+        self.tokens = Tokens(api=self.api)
         self.refresh()
 
     def refresh(self):
@@ -91,13 +94,13 @@ class Market(list):
                 market = Market(steem_instance=stm)
                 market.withdraw("test", 1)
         """
-        wallet = Wallet(account, steem_instance=self.steem)
+        wallet = Wallet(account, api=self.api, steem_instance=self.steem)
         token_in_wallet = wallet.get_token("STEEMP")
         if token_in_wallet is None:
             raise TokenNotInWallet("%s is not in wallet." % "STEEMP")
         if float(token_in_wallet["balance"]) < float(amount):
             raise InsufficientTokenAmount("Only %.3f in wallet" % float(token_in_wallet["balance"]))
-        token = Token("STEEMP")
+        token = Token("STEEMP", api=self.api)
         quant_amount = token.quantize(amount)
         if quant_amount <= decimal.Decimal("0"):
             raise InvalidTokenAmount("Amount to transfer is below token precision of %d" % token["precision"])        
@@ -151,14 +154,14 @@ class Market(list):
                 market = Market(steem_instance=stm)
                 market.buy("test", 1, "ENG", 0.95)
         """
-        wallet = Wallet(account, steem_instance=self.steem)
+        wallet = Wallet(account, api=self.api, steem_instance=self.steem)
         token_in_wallet = wallet.get_token("STEEMP")
         if token_in_wallet is None:
             raise TokenNotInWallet("%s is not in wallet." % "STEEMP")
         if float(token_in_wallet["balance"]) < float(amount) * float(price):
             raise InsufficientTokenAmount("Only %.3f in wallet" % float(token_in_wallet["balance"]))
 
-        token = Token(symbol)
+        token = Token(symbol, api=self.api)
         quant_amount = token.quantize(amount)
         if quant_amount <= decimal.Decimal("0"):
             raise InvalidTokenAmount("Amount to transfer is below token precision of %d" % token["precision"])           
@@ -187,14 +190,14 @@ class Market(list):
                 market = Market(steem_instance=stm)
                 market.sell("test", 1, "ENG", 0.95)
         """
-        wallet = Wallet(account, steem_instance=self.steem)
+        wallet = Wallet(account, api=self.api, steem_instance=self.steem)
         token_in_wallet = wallet.get_token(symbol)
         if token_in_wallet is None:
             raise TokenNotInWallet("%s is not in wallet." % symbol)
         if float(token_in_wallet["balance"]) < float(amount):
             raise InsufficientTokenAmount("Only %.3f in wallet" % float(token_in_wallet["balance"]))
         
-        token = Token(symbol)
+        token = Token(symbol, api=self.api)
         quant_amount = token.quantize(amount)
         if quant_amount <= decimal.Decimal("0"):
             raise InvalidTokenAmount("Amount to transfer is below token precision of %d" % token["precision"])        

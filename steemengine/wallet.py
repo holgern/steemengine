@@ -34,8 +34,11 @@ class Wallet(list):
                 print(wallet)
 
     """
-    def __init__(self, account, url=None, rpcurl=None, steem_instance=None):
-        self.api = Api(url=url, rpcurl=rpcurl)
+    def __init__(self, account, api=None, steem_instance=None):
+        if api is None:
+            self.api = Api()
+        else:
+            self.api = api        
         self.steem = steem_instance or shared_steem_instance()
         check_account = Account(account, steem_instance=self.steem)
         self.account = check_account["name"]
@@ -87,7 +90,7 @@ class Wallet(list):
             raise TokenNotInWallet("%s is not in wallet." % symbol)
         if float(token_in_wallet["balance"]) < float(amount):
             raise InsufficientTokenAmount("Only %.3f in wallet" % float(token_in_wallet["balance"]))
-        token = Token(symbol)
+        token = Token(symbol, api=self.api)
         quant_amount = token.quantize(amount)
         if quant_amount <= decimal.Decimal("0"):
             raise InvalidTokenAmount("Amount to transfer is below token precision of %d" % token["precision"])
@@ -117,7 +120,7 @@ class Wallet(list):
                 wallet = Wallet("test", steem_instance=stm)
                 wallet.issue(1, "my_token")
         """
-        token = Token(symbol)
+        token = Token(symbol, api=self.api)
         if token["issuer"] != self.account:
             raise TokenIssueNotPermitted("%s is not the issuer of token %s" % (self.account, symbol))
         

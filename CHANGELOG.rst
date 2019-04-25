@@ -11,6 +11,9 @@
 * Add amount quantization to deposit, withdraw, buy and sell
 * Add transfer, issue, withdraw, deposit, buy, sell, cancel, buybook, sellbook to CLI
 
+## 0.4.5
+* Propagate Api to all steemengine objects
+
 ## 0.4.4
 * Fix URL for RPC object
 

@@ -9,8 +9,11 @@ from steemengine.tokenobject import Token
 class Tokens(list):
     """ Access the steem-engine tokens
     """
-    def __init__(self, url=None, rpcurl=None, **kwargs):
-        self.api = Api(url=url, rpcurl=rpcurl)
+    def __init__(self, api=None, **kwargs):
+        if api is None:
+            self.api = Api()
+        else:
+            self.api = api        
         self.refresh()
 
     def refresh(self):
@@ -27,6 +30,6 @@ class Tokens(list):
         """
         for t in self:
             if t["symbol"].lower() == symbol.lower():
-                return Token(t)
+                return Token(t, api=self.api)
         return None
 
