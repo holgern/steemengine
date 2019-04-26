@@ -38,7 +38,8 @@ class Wallet(list):
         if api is None:
             self.api = Api()
         else:
-            self.api = api        
+            self.api = api
+        self.ssc_id = "ssc-mainnet1"
         self.steem = steem_instance or shared_steem_instance()
         check_account = Account(account, steem_instance=self.steem)
         self.account = check_account["name"]
@@ -46,6 +47,10 @@ class Wallet(list):
 
     def refresh(self):
         super(Wallet, self).__init__(self.get_balances())
+
+    def set_id(self, ssc_id):
+        """Sets the ssc id (default is ssc-mainnet1)"""
+        self.ssc_id = ssc_id
 
     def get_balances(self):
         """Returns all token within the wallet as list"""
@@ -98,7 +103,7 @@ class Wallet(list):
         contract_payload = {"symbol":symbol.upper(),"to":to,"quantity":str(quant_amount),"memo":memo}
         json_data = {"contractName":"tokens","contractAction":"transfer",
                      "contractPayload":contract_payload}
-        tx = self.steem.custom_json("ssc-mainnet1", json_data, required_auths=[self.account])
+        tx = self.steem.custom_json(self.ssc_id, json_data, required_auths=[self.account])
         return tx
 
     def issue(self, to, amount, symbol):
@@ -133,7 +138,7 @@ class Wallet(list):
         contract_payload = {"symbol":symbol.upper(),"to":to,"quantity":str(quant_amount)}
         json_data = {"contractName":"tokens","contractAction":"issue",
                      "contractPayload":contract_payload}
-        tx = self.steem.custom_json("ssc-mainnet1", json_data, required_auths=[self.account])
+        tx = self.steem.custom_json(self.ssc_id, json_data, required_auths=[self.account])
         return tx
 
     def get_history(self, symbol, limit=1000, offset=0):

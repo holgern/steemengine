@@ -31,10 +31,15 @@ class Market(list):
             self.api = api        
         self.steem = steem_instance or shared_steem_instance()
         self.tokens = Tokens(api=self.api)
+        self.ssc_id = "ssc-mainnet1"
         self.refresh()
 
     def refresh(self):
         super(Market, self).__init__(self.get_metrics())
+
+    def set_id(self, ssc_id):
+        """Sets the ssc id (default is ssc-mainnet1)"""
+        self.ssc_id = ssc_id
 
     def get_metrics(self):
         """Returns all token within the wallet as list"""
@@ -107,7 +112,7 @@ class Market(list):
         contract_payload = {"quantity":str(quant_amount)}
         json_data = {"contractName":"steempegged","contractAction":"withdraw",
                      "contractPayload":contract_payload}
-        tx = self.steem.custom_json("ssc-mainnet1", json_data, required_auths=[account])
+        tx = self.steem.custom_json(self.ssc_id, json_data, required_auths=[account])
         return tx
 
     def deposit(self, account, amount):
@@ -131,7 +136,7 @@ class Market(list):
         steem_balance = acc.get_balance("available", "STEEM")
         if float(steem_balance) < float(amount):
             raise InsufficientTokenAmount("Only %.3f in wallet" % float(steem_balance))
-        json_data = '{"id":"ssc-mainnet1","json":{"contractName":"steempegged","contractAction":"buy","contractPayload":{}}}'
+        json_data = '{"id":"' + self.ssc_id + '","json":{"contractName":"steempegged","contractAction":"buy","contractPayload":{}}}'
         tx = acc.transfer("steem-peg", amount, "STEEM", memo=json_data)
         return tx
 
@@ -168,7 +173,7 @@ class Market(list):
         contract_payload = {"symbol": symbol.upper(), "quantity":str(quant_amount), "price": str(price)}
         json_data = {"contractName":"market","contractAction":"buy",
                      "contractPayload":contract_payload}
-        tx = self.steem.custom_json("ssc-mainnet1", json_data, required_auths=[account])
+        tx = self.steem.custom_json(self.ssc_id, json_data, required_auths=[account])
         return tx
 
     def sell(self, account, amount, symbol, price):
@@ -204,7 +209,7 @@ class Market(list):
         contract_payload = {"symbol": symbol.upper(), "quantity":str(quant_amount), "price": str(price)}
         json_data = {"contractName":"market","contractAction":"sell",
                      "contractPayload":contract_payload}
-        tx = self.steem.custom_json("ssc-mainnet1", json_data, required_auths=[account])
+        tx = self.steem.custom_json(self.ssc_id, json_data, required_auths=[account])
         return tx
 
     def cancel(self, account, order_type, order_id):
@@ -229,5 +234,5 @@ class Market(list):
         contract_payload = {"type": order_type, "id": order_id}
         json_data = {"contractName":"market","contractAction":"cancel",
                      "contractPayload":contract_payload}
-        tx = self.steem.custom_json("ssc-mainnet1", json_data, required_auths=[account])
+        tx = self.steem.custom_json(self.ssc_id, json_data, required_auths=[account])
         return tx
