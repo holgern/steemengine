@@ -1,3 +1,25 @@
+## 0.5.0
+* Add stake, unstake, cancel_unstake to Wallet class
+* Add stake, unstake, cancel_unstake to the command line tool
+* Add stake and pendingUnstake to info from the commandline tool
+
+## 0.4.6
+* Allow to change the ssc id
+
+## 0.4.5
+* Propagate Api to all steemengine objects
+* tsetnet can be used https://testapi.steem-engine.com/
+
+## 0.4.4
+* Fix URL for RPC object
+
+## 0.4.3
+* Change URL also in RPC object
+
+## 0.4.2
+* URL for steemengine API can be set
+* Fix cancel for handling new buy/sell id
+
 ## 0.4.1
 * Fix cancel order id (int)
 
@@ -10,22 +32,6 @@
 * TokenIssueNotPermitted is raised when an account which is not the token issuer tries to issue
 * Add amount quantization to deposit, withdraw, buy and sell
 * Add transfer, issue, withdraw, deposit, buy, sell, cancel, buybook, sellbook to CLI
-
-## 0.4.6
-* Allow to change the ssc id
-
-## 0.4.5
-* Propagate Api to all steemengine objects
-
-## 0.4.4
-* Fix URL for RPC object
-
-## 0.4.3
-* Change URL also in RPC object
-
-## 0.4.2
-* URL for steemengine API can be set
-* Fix cancel for handling new buy/sell id
 
 ## 0.3.1
 * Fix circular dependency

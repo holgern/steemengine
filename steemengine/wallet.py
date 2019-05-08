@@ -106,6 +106,94 @@ class Wallet(list):
         tx = self.steem.custom_json(self.ssc_id, json_data, required_auths=[self.account])
         return tx
 
+    def stake(self, amount, symbol):
+        """Stake a token.
+
+            :param float amount: Amount to stake
+            :param str symbol: Token to stake
+
+            Stake example:
+
+            .. code-block:: python
+
+                from steemengine.wallet import Wallet
+                from beem import Steem
+                active_wif = "5xxxx"
+                stm = Steem(keys=[active_wif])
+                wallet = Wallet("test", steem_instance=stm)
+                wallet.stake(1, "ENG")
+        """
+        token_in_wallet = self.get_token(symbol)
+        if token_in_wallet is None:
+            raise TokenNotInWallet("%s is not in wallet." % symbol)
+        if float(token_in_wallet["balance"]) < float(amount):
+            raise InsufficientTokenAmount("Only %.3f in wallet" % float(token_in_wallet["balance"]))
+        token = Token(symbol, api=self.api)
+        quant_amount = token.quantize(amount)
+        if quant_amount <= decimal.Decimal("0"):
+            raise InvalidTokenAmount("Amount to stake is below token precision of %d" % token["precision"])
+        contract_payload = {"symbol":symbol.upper(),"quantity":str(quant_amount)}
+        json_data = {"contractName":"tokens","contractAction":"stake",
+                     "contractPayload":contract_payload}
+        tx = self.steem.custom_json(self.ssc_id, json_data, required_auths=[self.account])
+        return tx
+
+    def unstake(self, amount, symbol):
+        """Unstake a token.
+
+            :param float amount: Amount to unstake
+            :param str symbol: Token to unstake
+
+            Unstake example:
+
+            .. code-block:: python
+
+                from steemengine.wallet import Wallet
+                from beem import Steem
+                active_wif = "5xxxx"
+                stm = Steem(keys=[active_wif])
+                wallet = Wallet("test", steem_instance=stm)
+                wallet.unstake(1, "ENG")
+        """
+        token_in_wallet = self.get_token(symbol)
+        if token_in_wallet is None:
+            raise TokenNotInWallet("%s is not in wallet." % symbol)
+        if "stake" not in token_in_wallet:
+            raise InsufficientTokenAmount("Token cannot be unstaked")
+        if float(token_in_wallet["stake"]) < float(amount):
+            raise InsufficientTokenAmount("Only %.3f are staked in the wallet" % float(token_in_wallet["stake"]))
+        token = Token(symbol, api=self.api)
+        quant_amount = token.quantize(amount)
+        if quant_amount <= decimal.Decimal("0"):
+            raise InvalidTokenAmount("Amount to stake is below token precision of %d" % token["precision"])
+        contract_payload = {"symbol":symbol.upper(),"quantity":str(quant_amount)}
+        json_data = {"contractName":"tokens","contractAction":"unstake",
+                     "contractPayload":contract_payload}
+        tx = self.steem.custom_json(self.ssc_id, json_data, required_auths=[self.account])
+        return tx
+
+    def cancel_unstake(self, trx_id):
+        """Cancel unstaking a token.
+
+            :param str trx_id: transaction id in which the tokan was unstaked
+
+            Cancel unstake example:
+
+            .. code-block:: python
+
+                from steemengine.wallet import Wallet
+                from beem import Steem
+                active_wif = "5xxxx"
+                stm = Steem(keys=[active_wif])
+                wallet = Wallet("test", steem_instance=stm)
+                wallet.stake("cf39ecb8b846f1efffb8db526fada21a5fcf41c3")
+        """
+        contract_payload = {"txID":trx_id}
+        json_data = {"contractName":"tokens","contractAction":"cancelUnstake",
+                     "contractPayload":contract_payload}
+        tx = self.steem.custom_json(self.ssc_id, json_data, required_auths=[self.account])
+        return tx
+
     def issue(self, to, amount, symbol):
         """Issues a specific token amount.
 

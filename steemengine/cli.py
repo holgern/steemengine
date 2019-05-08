@@ -163,10 +163,18 @@ def info(objects):
                 nodelist.update_nodes()
                 stm = Steem(node=nodelist.get_nodes())                
             wallet = Wallet(obj, steem_instance=stm)
-            t = PrettyTable(["id", "symbol", "balance"])
+            t = PrettyTable(["id", "symbol", "balance", "stake", "pendingUnstake"])
             t.align = "l"
             for token in wallet:
-                t.add_row([token["$loki"], token["symbol"], token["balance"]])
+                if "stake" in token:
+                    stake = token["stake"]
+                else:
+                    stake = "-"
+                if "pendingUnstake" in token:
+                    pendingUnstake = token["pendingUnstake"]
+                else:
+                    pendingUnstake = "-"
+                t.add_row([token["$loki"], token["symbol"], token["balance"], stake, pendingUnstake])
             print(t.get_string(sortby="id"))
         elif len(obj) == 40:
             print("Transaction Id: %s" % obj)
@@ -236,19 +244,73 @@ def transfer(to, amount, token, memo, account):
 @click.argument('amount', nargs=1)
 @click.argument('token', nargs=1)
 @click.option('--account', '-a', help='Transfer from this account')
-def issue(to, amount, token, memo, account):
+def issue(to, amount, token, account):
     """Issue a token"""
     stm = shared_steem_instance()
     if stm.rpc is not None:
         stm.rpc.rpcconnect()
     if not account:
         account = stm.config["default_account"]
-    if not bool(memo):
-        memo = ''
     if not unlock_wallet(stm):
         return
     wallet = Wallet(account, steem_instance=stm)
     tx = wallet.issue(to, amount, token)
+    tx = json.dumps(tx, indent=4)
+    print(tx)
+
+
+@cli.command()
+@click.argument('amount', nargs=1)
+@click.argument('token', nargs=1)
+@click.option('--account', '-a', help='Transfer from this account')
+def stake(amount, token, account):
+    """stake a token"""
+    stm = shared_steem_instance()
+    if stm.rpc is not None:
+        stm.rpc.rpcconnect()
+    if not account:
+        account = stm.config["default_account"]
+    if not unlock_wallet(stm):
+        return
+    wallet = Wallet(account, steem_instance=stm)
+    tx = wallet.stake(amount, token)
+    tx = json.dumps(tx, indent=4)
+    print(tx)
+
+
+@cli.command()
+@click.argument('amount', nargs=1)
+@click.argument('token', nargs=1)
+@click.option('--account', '-a', help='Transfer from this account')
+def unstake(amount, token, account):
+    """unstake a token"""
+    stm = shared_steem_instance()
+    if stm.rpc is not None:
+        stm.rpc.rpcconnect()
+    if not account:
+        account = stm.config["default_account"]
+    if not unlock_wallet(stm):
+        return
+    wallet = Wallet(account, steem_instance=stm)
+    tx = wallet.unstake(amount, token)
+    tx = json.dumps(tx, indent=4)
+    print(tx)
+
+
+@cli.command()
+@click.argument('trx_id', nargs=1)
+@click.option('--account', '-a', help='Transfer from this account')
+def cancel_unstake(amount, trx_id):
+    """unstake a token"""
+    stm = shared_steem_instance()
+    if stm.rpc is not None:
+        stm.rpc.rpcconnect()
+    if not account:
+        account = stm.config["default_account"]
+    if not unlock_wallet(stm):
+        return
+    wallet = Wallet(account, steem_instance=stm)
+    tx = wallet.cancel_unstake(trx_id)
     tx = json.dumps(tx, indent=4)
     print(tx)
 
