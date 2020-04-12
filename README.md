@@ -110,7 +110,7 @@ stm = Steem(keys=["5xx"])
 m=Market(steem_instance=stm)
 m.deposit("test_user", 10)
 ```
-### Withdrawel
+### Withdrawal
 ```
 from beem import Steem
 from steemengine.market import Market
