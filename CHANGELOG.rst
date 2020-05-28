@@ -33,6 +33,13 @@
 * Add amount quantization to deposit, withdraw, buy and sell
 * Add transfer, issue, withdraw, deposit, buy, sell, cancel, buybook, sellbook to CLI
 
+## 0.5.2
+* set https://api.steemit.com as default node
+* allow to cancel all buy / sell orders at once
+* show all buy/sell order for an account
+* allow so transfer / stake / unstake / sell all tokens at once
+* When no amount is given by transfer / stake / unstake the token balance is used
+
 ## 0.3.1
 * Fix circular dependency
 

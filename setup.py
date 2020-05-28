@@ -16,7 +16,7 @@ except LookupError:
     ascii = codecs.lookup('ascii')
     codecs.register(lambda name, enc=ascii: {True: enc}.get(name == 'mbcs'))
 
-VERSION = '0.5.0'
+VERSION = '0.5.2'
 
 tests_require = ['mock >= 2.0.0', 'pytest', 'pytest-mock', 'parameterized']
 
@@ -56,9 +56,9 @@ if __name__ == '__main__':
         description='command line tool and python library for sending steem engine tokens',
         long_description=get_long_description(),
         author='Holger Nahrstaedt',
-        author_email='holger@nahrstaedt.de',
+        author_email='holgernahrstaedt@gmx.de',
         maintainer='Holger Nahrstaedt',
-        maintainer_email='holger@nahrstaedt.de',
+        maintainer_email='holgernahrstaedt@gmx.de',
         keywords=['steem', 'tools'],
         packages=[
             "steemengine",
