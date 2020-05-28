@@ -25,12 +25,12 @@ class Api(object):
         else:
             self.rpc = RPC(url=rpcurl)
 
-    def get_history(self, account, symbol, limit=1000, offset=0):
+    def get_history(self, account, symbol, limit=1000, offset=0, histtype="user"):
         """"Get the transaction history for an account and a token"""
-        response = requests.get("https://history.steem-engine.com/accountHistory?account=%s&limit=%d&offset=%d&symbol=%s" % (account, limit, offset, symbol))
+        response = requests.get(self.url + "accountHistory?account=%s&limit=%d&offset=%d&type=%s&symbol=%s" % (account, limit, offset, histtype, symbol))
         cnt2 = 0
         while response.status_code != 200 and cnt2 < 10:
-            response = requests.get("https://history.steem-engine.com/accountHistory?account=%s&limit=%d&offset=%d&symbol=%s" % (account, limit, offset, symbol))
+            response = requests.get(self.url + "accountHistory?account=%s&limit=%d&offset=%d&type=%s&symbol=%s" % (account, limit, offset, histtype, symbol))
             cnt2 += 1
         return response.json()
 
